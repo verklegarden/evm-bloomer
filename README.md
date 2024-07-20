@@ -12,3 +12,11 @@
     - simple version matching
     - easy comparison
     - beautiful visualizations
+
+## TODOs
+
+- Cooler visualization, should look more like a flower
+- Bloom to opcode mapping, eg show mnemonic if possible
+- Bulk run, ie check list of rpc urls, and serialize to json with `(chain_id, bloom)`
+- Deserialize json file and verify if still valid
+    - Last two points important for automated monitoring of evm updates on chains
