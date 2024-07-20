@@ -15,6 +15,9 @@ use bit_vec::BitVec;
 use eyre::Result;
 use image::{ImageBuffer, Rgb};
 
+mod evm_bloom;
+
+/*
 /// EVMBloom
 pub struct EVMBloom {
     bloom: BitVec,
@@ -150,3 +153,4 @@ impl fmt::Display for EVMBloom {
         write!(f, "{}", self.bloom)
     }
 }
+*/

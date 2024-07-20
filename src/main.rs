@@ -35,7 +35,7 @@ async fn main() -> Result<()> {
 
     // Create EVMBloom for given rpc url.
     let bloom = EVMBloom::create(rpc_url).await?;
-    println!("EVMBloom: {}", bloom);
+    println!("{}", bloom);
 
     // Compute distance to mainnet.
     let distance = bloom.compute_distance(&EVMBloom::ethereum());
