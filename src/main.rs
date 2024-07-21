@@ -36,13 +36,21 @@ async fn main() -> Result<()> {
     // Create EVMBloom for given rpc url.
     let bloom = EVMBloom::create(rpc_url).await?;
     println!("{}", bloom);
+    println!("{}", bloom.to_table());
+
+    println!("Supports cancun? {}", bloom.supports_cancun());
+    println!("Is cancun? {}", bloom.is_version_cancun());
+
+    if !bloom.supports_cancun() {
+        // Find non-supported opcodes.
+    }
 
     // Compute distance to mainnet.
-    let distance = bloom.compute_distance(&EVMBloom::ethereum());
-    println!("Distance to mainnet: {}", distance);
+    //let distance = bloom.compute_distance(&evm_bloomer::evm_bloom::EVMBloom::ethereum());
+    //println!("Distance to mainnet: {}", distance);
 
     // Visualize.
-    bloom.visualize()?;
+    //bloom.visualize()?;
 
     Ok(())
 }
