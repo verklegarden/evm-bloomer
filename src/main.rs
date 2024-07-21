@@ -1,9 +1,14 @@
 //! EVM-Bloomer ...
-
+//!
+#[macro_use]
+extern crate lazy_static;
+mod asm_parser;
 use clap::Parser;
 use eyre::Result;
 
 use evm_bloomer::EVMBloom;
+
+use crate::asm_parser::verify_project::verify_project_bloom_filter;
 
 #[derive(Parser)]
 struct Cli {
@@ -38,21 +43,29 @@ async fn main() -> Result<()> {
     println!("{}", bloom);
     println!("{}", bloom.to_table());
 
-    println!("Supports cancun? {}", bloom.supports_cancun());
-    println!("Is cancun? {}", bloom.is_version_cancun());
+    // println!("Supports cancun? {}", bloom.supports_cancun());
+    // println!("Is cancun? {}", bloom.is_version_cancun());
 
-    if !bloom.supports_cancun() {
-        // Find non-supported opcodes.
-    }
+    // if !bloom.supports_cancun() {
+    //     // Find non-supported opcodes.
+    // }
 
     // Compute distance to mainnet.
     //let distance = bloom.compute_distance(&evm_bloomer::evm_bloom::EVMBloom::ethereum());
     //println!("Distance to mainnet: {}", distance);
 
     // Visualize.
-    //bloom.visualize()?;
+    // bloom.visualize()?.save("sep.png").expect("Failed to save");
+
+
+    ////////////////// Check Project uses valid ASM //////////////////
+    // Compile a project with forge build --extra-output-files evm.assembly
+    // Then provide the absolute path to the project "out" directory
+    println!("{:?}",verify_project_bloom_filter("/home/max/tmp/chronicle-dao/out",bloom));
+    //////////////////////////////////////////////////////////////////
 
     Ok(())
+
 }
 
 /*

@@ -1,16 +1,21 @@
 //! EVMBloomer ...
-
+#[macro_use]
+extern crate lazy_static;
+mod asm_parser;
+use tokio::time::{sleep, Duration};
 use std::fmt;
 use std::ops::{Deref, DerefMut};
 
+use alloy::providers::RootProvider;
+use alloy::transports::http::{Client, Http};
 use alloy::{
-    hex,
     network::TransactionBuilder,
     primitives::*,
     providers::{Provider, ProviderBuilder},
     rpc::types::TransactionRequest,
     transports::http::reqwest::Url,
 };
+use futures::future::join_all;
 
 use bit_vec::BitVec;
 use eyre::Result;
@@ -20,49 +25,45 @@ use image::{ImageBuffer, Rgb};
 #[derive(Debug)]
 pub struct EVMBloom(BitVec);
 
+lazy_static! {
+    static ref SUPPORTED_ERRORS: Vec<String> = vec![
+        String::from("stack underflow")
+    ];
+    static ref UNSUPPORTED_ERRORS: Vec<String> = vec![
+        String::from("invalid opcode"),
+        String::from("is not supported")
+    ];
+}
+
 impl EVMBloom {
+
+    pub fn new() -> EVMBloom {
+        EVMBloom(BitVec::from_elem(256, false))
+    }
     /// Creates the [EVMBloom] of rpc url `rpc_url`.
     pub async fn create(rpc_url: Url) -> Result<Self> {
         let provider = ProviderBuilder::new().on_http(rpc_url);
 
         // Create bloom by trying to execute each possible opcode.
-        let mut bloom = BitVec::from_elem(256, false);
+        let mut bloom = EVMBloom::new();
+
+        let mut futures_results = vec![];
         for i in 0u8..=255 {
-            let bytecode = hex::decode(format!("{:02x}", i))?;
-
-            let tx = TransactionRequest::default()
-                .with_from(address!("0000000000000000000000000000000000000000"))
-                .with_deploy_code(bytecode);
-
-            match provider.call(&tx).await {
-                Ok(_) => {
-                    bloom.set(usize::from(i), true);
-                }
-                Err(e) => {
-                    let e_str = e.to_string();
-
-                    // Note that execution can fail due to multiple reasons.
-                    // An opcode is considered invalid, ie not supported, if the error message
-                    // contains one of the following patterns.
-                    let not_supported_patterns = vec!["invalid opcode", "is not supported"];
-
-                    let is_supported = not_supported_patterns
-                        .iter()
-                        .all(|&pattern| !e_str.contains(pattern));
-
-                    if is_supported {
-                        bloom.set(usize::from(i), true);
-
-                        // Note to print unknown errors for debugging.
-                        if !e_str.contains("stack underflow") {
-                            println!("unknown execution error: {}", e);
-                        }
-                    }
+            futures_results.push(check_opcode(i,&provider));
+        }
+        let results: Vec<Result<bool>> = join_all(futures_results).await;
+        for (index, result) in results.iter().enumerate() {
+            match result {
+                Ok(val) => {
+                    bloom.set(index,*val);
+                },
+                Err(_) => {
+                    bloom.set(index,false);
                 }
             }
         }
 
-        Ok(EVMBloom(bloom))
+        Ok(bloom)
     }
 
     /// Returns an image visualization of [EVMBloom].
@@ -117,6 +118,38 @@ impl EVMBloom {
         format!("{}", chain_id)
     }
 }
+
+async fn check_opcode(opcode: u8, provider: &RootProvider<Http<Client>>) -> Result<bool> {
+    // Add a sleep to prevent exceeding the max api rate :(
+    sleep(Duration::from_millis(50*(opcode as u64))).await;
+    let bytecode = vec![opcode];
+    let tx = TransactionRequest::default()
+            .with_from(address!("0000000000000000000000000000000000000000"))
+            .with_deploy_code(bytecode);
+        match provider.call(&tx).await {
+            Ok(_) => {
+                return Ok(true);
+            }
+            Err(e) => {
+                let e_str = e.to_string();
+                println!("{}",e_str);
+
+                let is_supported = SUPPORTED_ERRORS
+                    .iter()
+                    .any(|pattern| e_str.contains(pattern));
+
+                if is_supported {
+                    // Note to print unknown errors for debugging.
+                    if !e_str.contains("stack underflow") {
+                        println!("unknown execution error: {}", e);
+                    }
+                    return Ok(true);
+                }
+                return Ok(false);
+            }
+        }
+}
+
 
 // Offers EVM version comparison functions.
 // TODO: This should be removed. Easy enough to do via bit operations outside of
