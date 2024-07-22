@@ -2,9 +2,9 @@
 #[macro_use]
 extern crate lazy_static;
 mod asm_parser;
-use tokio::time::{sleep, Duration};
 use std::fmt;
 use std::ops::{Deref, DerefMut};
+use tokio::time::{sleep, Duration};
 
 use alloy::providers::RootProvider;
 use alloy::transports::http::{Client, Http};
@@ -26,9 +26,7 @@ use image::{ImageBuffer, Rgb};
 pub struct EVMBloom(BitVec);
 
 lazy_static! {
-    static ref SUPPORTED_ERRORS: Vec<String> = vec![
-        String::from("stack underflow")
-    ];
+    static ref SUPPORTED_ERRORS: Vec<String> = vec![String::from("stack underflow")];
     static ref UNSUPPORTED_ERRORS: Vec<String> = vec![
         String::from("invalid opcode"),
         String::from("is not supported")
@@ -36,7 +34,6 @@ lazy_static! {
 }
 
 impl EVMBloom {
-
     pub fn new() -> EVMBloom {
         EVMBloom(BitVec::from_elem(256, false))
     }
@@ -49,16 +46,16 @@ impl EVMBloom {
 
         let mut futures_results = vec![];
         for i in 0u8..=255 {
-            futures_results.push(check_opcode(i,&provider));
+            futures_results.push(check_opcode(i, &provider));
         }
         let results: Vec<Result<bool>> = join_all(futures_results).await;
         for (index, result) in results.iter().enumerate() {
             match result {
                 Ok(val) => {
-                    bloom.set(index,*val);
-                },
+                    bloom.set(index, *val);
+                }
                 Err(_) => {
-                    bloom.set(index,false);
+                    bloom.set(index, false);
                 }
             }
         }
@@ -73,21 +70,54 @@ impl EVMBloom {
         let imgy = 16;
         let mut img: ImageBuffer<Rgb<u8>, Vec<u8>> = ImageBuffer::new(imgx, imgy);
 
-        // Iterate over each pixel position.
-        for (x, y, pixel) in img.enumerate_pixels_mut() {
-            // Calculate bit index.
-            let bit_index = (y * imgx + x) as usize;
-
-            // Get bit value.
-            let bit = match self.get(bit_index) {
-                Some(b) => b,
-                None => false,
-            };
-
-            // Convert bit value to color (black or white).
-            let color_value = if bit { 0 } else { 255 };
-            *pixel = Rgb([color_value, color_value, color_value]);
+        let mut counter = 0;
+        let mut pos: [i64; 2] = [7, 7];
+        let mut mag = 1;
+        let mut dir: [i64; 2] = [1, 0];
+        'outer: loop {
+            // Take "mag" steps in 2 consecutive directions
+            for _ in 0..2 {
+                // Take mage steps in direction "dir"
+                for _ in 0..mag {
+                        if counter >= 256 {
+                            break 'outer;
+                        }
+                        let bit = match self.get(counter) {
+                            Some(b) => b,
+                            None => false,
+                        };
+                        let color_value = if bit { 0 } else { 255 };
+                        println!("{:?}",pos);
+                        let pixel = img.get_pixel_mut(pos[0] as u32, pos[1] as u32);
+                        *pixel = Rgb([color_value, color_value, color_value]);
+                        pos[0] += dir[0];
+                        pos[1] += dir[1];
+                        counter += 1;
+                }
+                // Rotate "dir" 90 degrees
+                let tmp = dir[0];
+                dir[0] = -1 * dir[1];
+                dir[1] = tmp;
+            }
+            // Increase step size "mag"
+            mag += 1;
         }
+
+        // // Iterate over each pixel position.
+        // for (x, y, pixel) in img.enumerate_pixels_mut() {
+        //     // Calculate bit index.
+        //     let bit_index = (y * imgx + x) as usize;
+
+        //     // Get bit value.
+        //     let bit = match self.get(bit_index) {
+        //         Some(b) => b,
+        //         None => false,
+        //     };
+
+        //     // Convert bit value to color (black or white).
+        //     let color_value = if bit { 0 } else { 255 };
+        //     *pixel = Rgb([color_value, color_value, color_value]);
+        // }
 
         Ok(img)
     }
@@ -121,35 +151,34 @@ impl EVMBloom {
 
 async fn check_opcode(opcode: u8, provider: &RootProvider<Http<Client>>) -> Result<bool> {
     // Add a sleep to prevent exceeding the max api rate :(
-    sleep(Duration::from_millis(50*(opcode as u64))).await;
+    sleep(Duration::from_millis(50 * (opcode as u64))).await;
     let bytecode = vec![opcode];
     let tx = TransactionRequest::default()
-            .with_from(address!("0000000000000000000000000000000000000000"))
-            .with_deploy_code(bytecode);
-        match provider.call(&tx).await {
-            Ok(_) => {
+        .with_from(address!("0000000000000000000000000000000000000000"))
+        .with_deploy_code(bytecode);
+    match provider.call(&tx).await {
+        Ok(_) => {
+            return Ok(true);
+        }
+        Err(e) => {
+            let e_str = e.to_string();
+            println!("{}", e_str);
+
+            let is_supported = SUPPORTED_ERRORS
+                .iter()
+                .any(|pattern| e_str.contains(pattern));
+
+            if is_supported {
+                // Note to print unknown errors for debugging.
+                if !e_str.contains("stack underflow") {
+                    println!("unknown execution error: {}", e);
+                }
                 return Ok(true);
             }
-            Err(e) => {
-                let e_str = e.to_string();
-                println!("{}",e_str);
-
-                let is_supported = SUPPORTED_ERRORS
-                    .iter()
-                    .any(|pattern| e_str.contains(pattern));
-
-                if is_supported {
-                    // Note to print unknown errors for debugging.
-                    if !e_str.contains("stack underflow") {
-                        println!("unknown execution error: {}", e);
-                    }
-                    return Ok(true);
-                }
-                return Ok(false);
-            }
+            return Ok(false);
         }
+    }
 }
-
 
 // Offers EVM version comparison functions.
 // TODO: This should be removed. Easy enough to do via bit operations outside of

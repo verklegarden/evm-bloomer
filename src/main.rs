@@ -3,12 +3,13 @@
 #[macro_use]
 extern crate lazy_static;
 mod asm_parser;
+use alloy::transports::http::reqwest::Url;
 use clap::Parser;
 use eyre::Result;
 
 use evm_bloomer::EVMBloom;
 
-use crate::asm_parser::verify_project::verify_project_bloom_filter;
+use crate::asm_parser::verify_project::{verify_project_bloom_filter,get_project_bloom};
 
 #[derive(Parser)]
 struct Cli {
@@ -33,15 +34,16 @@ struct Cli {
 async fn main() -> Result<()> {
     let args = Cli::parse();
 
-    let rpc_url = match args.rpc_url.parse() {
+    let rpc_url: Url = match args.rpc_url.parse() {
         Ok(rpc) => rpc,
         Err(e) => panic!("Invalid RPC URL provided: {}", e),
     };
 
     // Create EVMBloom for given rpc url.
     let bloom = EVMBloom::create(rpc_url).await?;
-    println!("{}", bloom);
-    println!("{}", bloom.to_table());
+    bloom.visualize()?.save("polygon2.png").expect("");
+    // println!("{}", bloom);
+    // println!("{}", bloom.to_table());
 
     // println!("Supports cancun? {}", bloom.supports_cancun());
     // println!("Is cancun? {}", bloom.is_version_cancun());
@@ -61,7 +63,10 @@ async fn main() -> Result<()> {
     ////////////////// Check Project uses valid ASM //////////////////
     // Compile a project with forge build --extra-output-files evm.assembly
     // Then provide the absolute path to the project "out" directory
-    println!("{:?}",verify_project_bloom_filter("/home/max/tmp/chronicle-dao/out",bloom));
+    // println!("{:?}",verify_project_bloom_filter("/home/max/tmp/chronicle-dao/out",bloom));
+    let bloom = get_project_bloom("/home/max/tmp/chronicle-dao/out");
+    println!("{:?}",bloom);
+    bloom.unwrap().visualize()?.save("timelock2.png").expect("");
     //////////////////////////////////////////////////////////////////
 
     Ok(())

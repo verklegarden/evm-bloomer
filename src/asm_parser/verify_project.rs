@@ -8,6 +8,15 @@ use crate::EVMBloom;
 use super::opcodes::EVM_OPCODES;
 
 pub fn verify_project_bloom_filter(project_path: &str, correct_bloom: EVMBloom) -> Result<bool> {
+    let project_opcode_bloom = get_project_bloom(project_path).unwrap();
+    println!("{:?}", correct_bloom);
+    println!("{:?}", project_opcode_bloom);
+    let mut combined_bloom = project_opcode_bloom.clone();
+    combined_bloom.or(&correct_bloom);
+    Ok(combined_bloom.eq(&correct_bloom))
+}
+
+pub fn get_project_bloom(project_path: &str) -> Result<EVMBloom> {
     let mut project_opcode_bloom = EVMBloom::new();
     for entry in WalkDir::new(project_path)
         .into_iter()
@@ -33,11 +42,7 @@ pub fn verify_project_bloom_filter(project_path: &str, correct_bloom: EVMBloom) 
             }
         }
     }
-    println!("{:?}", correct_bloom);
-    println!("{:?}", project_opcode_bloom);
-    let mut combined_bloom = project_opcode_bloom.clone();
-    combined_bloom.or(&correct_bloom);
-    Ok(combined_bloom.eq(&correct_bloom))
+    Ok(project_opcode_bloom)
 }
 
 fn check_asm_line(line: &str, bloom_filter: &mut EVMBloom) {
