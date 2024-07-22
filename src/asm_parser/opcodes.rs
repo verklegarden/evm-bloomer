@@ -5,7 +5,6 @@ lazy_static! {
     pub static ref EVM_OPCODES: HashMap<&'static str, u8> = {
         let mut m = HashMap::new();
 
-        // Adding some common EVM instructions and their opcodes
         m.insert("STOP", 0x00);
         m.insert("ADD", 0x01);
         m.insert("MUL", 0x02);
