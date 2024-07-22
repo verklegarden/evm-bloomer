@@ -44,7 +44,7 @@ impl EVMBloom {
                     // Note that execution can fail due to multiple reasons.
                     // An opcode is considered invalid, ie not supported, if the error message
                     // contains one of the following patterns.
-                    let not_supported_patterns = vec!["invalid opcode", "is not supported"];
+                    let not_supported_patterns = ["invalid opcode", "is not supported"];
 
                     let is_supported = not_supported_patterns
                         .iter()
@@ -78,10 +78,7 @@ impl EVMBloom {
             let bit_index = (y * imgx + x) as usize;
 
             // Get bit value.
-            let bit = match self.get(bit_index) {
-                Some(b) => b,
-                None => false,
-            };
+            let bit = self.get(bit_index).unwrap_or(false);
 
             // Convert bit value to color (black or white).
             let color_value = if bit { 0 } else { 255 };
@@ -95,15 +92,19 @@ impl EVMBloom {
     pub fn to_table(&self) -> String {
         let mut result = String::from("Opcode | Mnemonic        | Supported?\n");
         result.push_str("------------------------------------\n");
-        for i in 0..=255 {
-            let mnemonic = MNEMONICS[i];
-
+        for (i, mnemonic) in MNEMONICS.iter().enumerate() {
             let supported = match self.get(i) {
                 Some(b) => b,
                 None => unreachable!(),
             };
 
-            result.push_str(format!("0x{:02X}   | {:15} | {}\n", i, mnemonic, supported).as_str());
+            if mnemonic != &"" {
+                result.push_str(
+                    format!("0x{:02X}   | {:15} | {}\n", i, mnemonic, supported).as_str(),
+                );
+            } else {
+                result.push_str(format!("0x{:02X}   | {:15} | {}\n", i, "-", "-").as_str());
+            }
         }
 
         result
@@ -133,7 +134,7 @@ impl EVMBloom {
 
         // Return whether (cancun & self.bloom) == cancun.
         let mut conjuction = cancun.clone();
-        if !conjuction.and(&self) {
+        if !conjuction.and(self) {
             panic!("EVMBloom::supports_cancun: bitwise and failed");
         }
         conjuction.eq(&cancun)
