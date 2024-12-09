@@ -1,0 +1,52 @@
+# Daily report workflow that generates the bloom for each RPC URL contained in
+# chainid.network.
+#
+# The report is stored in artifacts.
+name: "daily-report"
+
+on:
+  schedule:
+    - cron: '0 5 * * *' # Run at 5:00 AM UTC every day
+  push: # Only for testing
+    branches:
+      - main
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v3
+
+      - name: Install toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          profile: minimal
+          override: true
+
+      - name: Generate new report
+        id: generate_report
+        run: |
+          rpcs=(
+            "https://ethereum-rpc.publicnode.com"               #  1 - Ethereum
+            "https://mainnet.optimism.io"             # 10 - Optimism
+          )
+          cargo run -- -r $rpcs | jq > evm-blooms.json
+
+      - name: Create release
+        uses: actions/upload-release-asset@v1
+        id: create_release
+        with:
+          release_name: daily-report
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload report to release
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: evm-blooms.json
+          asset_name: evm-blooms.json
+          asset_content_type: application/json
