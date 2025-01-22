@@ -60,9 +60,23 @@ A similar project, [`OpcodesBitmap`](https://github.com/AmadiMichael/OpcodesBitm
 
 ## Bloom Creation
 
-`evm-bloomer` creates a chain's bloom from its RPC url by simulating a contract deployment whose
+`evm-bloomer` creates a chain's bloom from its RPC URL by simulating a contract deployment whose
 bytecode is a single opcode. If the RPC's EVM does not support the opcode the deployment fails,
 otherwise it either succeeds or returns a known error (eg `stack underflow`).
+
+## Roadmap
+
+At the current state the tool is unreliable. While it seems to work for Alchemy RPCs, it fails for
+many others.
+
+The end goal is to automatically have a daily report of blooms for common chains generated and
+published. Security monitoring tools could use these reports to analyse against verified contracts.
+
+## Contributing
+
+All contributions are highly welcome!
+
+Feel free to create an issue to discuss ideas or first reach out privately to [merkleplant](https://merkleplant.xyz).
 
 ## License
 
