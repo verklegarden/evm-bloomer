@@ -27,7 +27,7 @@ struct Cli {
 
 #[derive(Debug, Serialize)]
 struct Report {
-    // TODO: Timestamp
+    // TODO: Add timestamp?
     blooms: Vec<EVMBloom>,
 }
 

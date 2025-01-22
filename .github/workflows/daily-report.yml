@@ -31,7 +31,7 @@ jobs:
         run: |
           rpcs=(
             "https://ethereum-rpc.publicnode.com"               #  1 - Ethereum
-            "https://mainnet.optimism.io"             # 10 - Optimism
+            "https://mainnet.optimism.io"                       # 10 - Optimism
           )
           cargo run -- -r $rpcs | jq > evm-blooms.json
 
