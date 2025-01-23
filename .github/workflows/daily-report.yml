@@ -41,6 +41,7 @@ jobs:
       - name: Create release
         id: create_release
         uses: actions/create-release@v1
+        permissions: write-all
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -49,8 +50,10 @@ jobs:
           draft: false
           prerelease: false
 
-      - name: Upload JSON to release
+      - name: Upload report to release
+        id: upload_report
         uses: actions/upload-release-asset@v1
+        permissions: write-all
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
