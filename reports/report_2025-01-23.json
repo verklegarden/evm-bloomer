@@ -1,0 +1,10 @@
+{
+  "blooms": [
+    {
+      "bloom": "0xfff0fffc8000ffffffe0fffffffffffffffffffff8000000000000000000fc27",
+      "chain_id": 10,
+      "unknown_opcodes": [],
+      "version": "cancun"
+    }
+  ]
+}
