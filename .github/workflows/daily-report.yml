@@ -1,7 +1,3 @@
-# Daily report workflow that generates the bloom for each RPC URL contained in
-# chainid.network.
-#
-# The report is stored in artifacts.
 name: "daily-report"
 
 on:
@@ -27,20 +23,21 @@ jobs:
           override: true
 
       - name: Generate report
-        id: generate_report
         env:
           ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
         run: |
+          # Define rpcs
           rpcs=(
             "https://eth-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}" #  1 - Ethereum
             "https://opt-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}" # 10 - Optimism
           )
+          # Generate report
           cargo run -- -r $rpcs | jq > evm-blooms.json
           echo "" && cat evm-blooms.json                              # For better debugging
-
-      - name: Release report
-        uses: softprops/action-gh-release@v2
-        with:
-          name: "evm-bloomer test release"
-          files: evm-blooms.json
+          # Commit report to
+          git config --global user.name 'Github Actions'
+          git config --global user.email 'github-actions@users.noreply.github.com'
+          gid add evm-blooms.json
+          git commit -m "reports: Daily report generation"
+          git push
 
