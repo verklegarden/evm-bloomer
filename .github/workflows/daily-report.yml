@@ -36,12 +36,25 @@ jobs:
             "https://opt-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}" # 10 - Optimism
           )
           cargo run -- -r $rpcs | jq > evm-blooms.json
+          echo "" && cat evm-blooms.json                              # For better debugging
 
-      - name: Publish report as release
+      - name: Create release
+        id: create_release
+        uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          gh release view v1.0.0 || gh release create v1.0.0 -t "Release v1.0.0" -n "Automated Release"
+        with:
+          tag_name: v1.0.0
+          release_name: "Release v1.0.0"
+          draft: false
+          prerelease: false
 
-          # Upload the JSON file to the release
-          gh release upload v1.0.0 evm-blooms.json
+      - name: Upload JSON to release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: evm-blooms.json
+          asset_name: evm-blooms.json
+          asset_content_type: application/json
