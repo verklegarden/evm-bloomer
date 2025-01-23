@@ -23,8 +23,11 @@ jobs:
           override: true
 
       - name: Generate report
+        permissions:
+          contents: write
         env:
           ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
+        shell: bash
         run: |
           # Define rpcs
           rpcs=(
@@ -32,12 +35,11 @@ jobs:
             "https://opt-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}" # 10 - Optimism
           )
           # Generate report
-          cargo run -- -r $rpcs | jq > evm-blooms.json
-          echo "" && cat evm-blooms.json                              # For better debugging
-          # Commit report to
+          cargo run -- -r $rpcs | jq > reports/report_$(date -u +"%Y-%m-%d").json
+          # Commit report to reports/ directory
           git config --global user.name 'Github Actions'
           git config --global user.email 'github-actions@users.noreply.github.com'
-          gid add evm-blooms.json
-          git commit -m "reports: Daily report generation"
+          git add reports/
+          git commit -m "reports: Generated daily report"
           git push
 
