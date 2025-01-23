@@ -135,6 +135,7 @@ lazy_static! {
     static ref SUPPORTED_ERRORS: Vec<String> = vec![
         String::from("stack underflow"),
         String::from("StackUnderflow"),
+        String::from("stackunderflow"),
     ];
 }
 
