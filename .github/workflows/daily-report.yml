@@ -26,7 +26,7 @@ jobs:
           profile: minimal
           override: true
 
-      - name: Generate new report
+      - name: Generate report
         id: generate_report
         env:
           ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
@@ -38,26 +38,9 @@ jobs:
           cargo run -- -r $rpcs | jq > evm-blooms.json
           echo "" && cat evm-blooms.json                              # For better debugging
 
-      - name: Create release
-        id: create_release
-        uses: actions/create-release@v1
-        permissions: write-all
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Release report
+        uses: softprops/action-gh-release@v2
         with:
-          tag_name: v1.0.0
-          release_name: "Release v1.0.0"
-          draft: false
-          prerelease: false
+          name: "evm-bloomer test release"
+          files: evm-blooms.json
 
-      - name: Upload report to release
-        id: upload_report
-        uses: actions/upload-release-asset@v1
-        permissions: write-all
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: evm-blooms.json
-          asset_name: evm-blooms.json
-          asset_content_type: application/json
