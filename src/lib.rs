@@ -34,7 +34,7 @@ impl EVMBloom {
         // Asynchronously check each opcode's support.
         let mut futures_results = vec![];
         for i in 0u8..=255 {
-            futures_results.push(check_opcode(i, &provider));
+            futures_results.push(check_opcode(i, &provider, chain_id));
         }
         let results: Vec<bool> = join_all(futures_results).await;
 
@@ -93,7 +93,7 @@ impl EVMBloom {
 /// Checks whether opcode `opcode` is supported by provider `provider`.
 ///
 /// Whether an opcode is supported is tested by executing the opcode in a deploy tx.
-async fn check_opcode(opcode: u8, provider: &RootProvider<Http<Client>>) -> bool {
+async fn check_opcode(opcode: u8, provider: &RootProvider<Http<Client>>, chain_id: u64) -> bool {
     // Note to always support STOP and INVALID opcodes.
     if opcode == 0x00 || opcode == 0xFE {
         return true;
@@ -121,7 +121,7 @@ async fn check_opcode(opcode: u8, provider: &RootProvider<Http<Client>>) -> bool
 
             // Enabled for debugging.
             if !ok {
-                eprintln!("{}", e);
+                eprintln!("{:>5} -- {}", chain_id, e);
             }
 
             ok

@@ -10,7 +10,6 @@
 //!
 use clap::Parser;
 use eyre::Result;
-use futures::future::try_join_all;
 use serde::Serialize;
 use serde_json::json;
 
@@ -44,17 +43,18 @@ async fn main() -> Result<()> {
         }
     }
 
-    // Asynchronously generate blooms.
-    let mut futures_results = vec![];
+    // Synchronously generate blooms.
+    let mut blooms: Vec<EVMBloom> = vec![];
     for rpc_url in rpc_urls {
-        futures_results.push(EVMBloom::new(rpc_url.clone()));
+        let bloom = EVMBloom::new(rpc_url.clone())
+            .await
+            .expect("failed to generate bloom");
+
+        blooms.push(bloom);
     }
-    let blooms: Vec<EVMBloom> = try_join_all(futures_results)
-        .await
-        .expect("failed to generate blooms");
 
     let report = Report { blooms };
-    println!("{}", json!(report)); // .json());
+    println!("{}", json!(report));
 
     Ok(())
 }
