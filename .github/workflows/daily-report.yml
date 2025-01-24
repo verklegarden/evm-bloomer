@@ -37,7 +37,7 @@ jobs:
           )
           # Generate report
           report="reports/report_$(date -u +"%Y-%m-%d").json"
-          cargo run -- -r $rpcs | jq > $report
+          cargo run -- -r ${rpcs[@]} | jq > $report
           # Debugging
           echo "" && cat $report
           # Commit report to reports/ directory
