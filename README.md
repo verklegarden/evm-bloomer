@@ -7,7 +7,7 @@
 The `evm-bloomer` is a tool to analyse chains' EVM versions.
 
 > [!WARNING]
-> Does not work for many RPCs and may be unreliable.
+> Does not work for many rpcs and may be unreliable.
 >
 > Released to gather feedback. Not production ready!
 
@@ -30,6 +30,15 @@ $ evm-bloomer --rpc-urls $rpc_oeth | jq
 >     }
 >   ]
 > }
+```
+
+## Requesting a new Chain
+
+To request a new chain please open an issue.
+
+Test rpc url via:
+```sh
+cargo run -- -r "$RPC_URL" | jq
 ```
 
 ## Background
@@ -60,17 +69,9 @@ A similar project, [`OpcodesBitmap`](https://github.com/AmadiMichael/OpcodesBitm
 
 ## Bloom Creation
 
-`evm-bloomer` creates a chain's bloom from its RPC URL by simulating a contract deployment whose
-bytecode is a single opcode. If the RPC's EVM does not support the opcode the deployment fails,
+`evm-bloomer` creates a chain's bloom from its rpc url by simulating a contract deployment whose
+bytecode is a single opcode. If the rpc's EVM does not support the opcode the deployment fails,
 otherwise it either succeeds or returns a known error (eg `stack underflow`).
-
-## Roadmap
-
-At the current state the tool is unreliable. While it seems to work for Alchemy RPCs, it fails for
-many others.
-
-The end goal is to automatically have a daily report of blooms for common chains generated and
-published. Security monitoring tools could use these reports to analyse against verified contracts.
 
 ## Contributing
 
