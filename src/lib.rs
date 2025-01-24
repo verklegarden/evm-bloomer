@@ -99,15 +99,15 @@ async fn check_opcode(opcode: u8, provider: &RootProvider<Http<Client>>, chain_i
         return true;
     }
 
-    // Add randomized delay to prevent hitting rate limits.
+    // Add delay of up to 1 minute to prevent hitting rate limits.
     sleep(Duration::from_millis(
-        rand::thread_rng().gen_range(1..1000) * (opcode as u64),
+        rand::thread_rng().gen_range(1..60000),
     ))
     .await;
 
     // Construct deploy tx trying to execute the opcode.
     let tx = TransactionRequest::default()
-        .with_from(address!("0000000000000000000000000000000000000000"))
+        .with_from(address!("0000000000000000000000000000000000000001"))
         .with_deploy_code(vec![opcode]);
 
     // Perform RPC call.
