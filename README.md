@@ -76,7 +76,7 @@ published. Security monitoring tools could use these reports to analyse against 
 
 All contributions are highly welcome!
 
-Feel free to create an issue to discuss ideas or first reach out privately to [merkleplant](https://merkleplant.xyz).
+Feel free to create a PR, an issue to discuss ideas, or reach out privately to [merkleplant](https://merkleplant.xyz).
 
 ## License
 
