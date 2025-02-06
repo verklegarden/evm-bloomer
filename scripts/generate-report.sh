@@ -15,5 +15,8 @@ rpcs=(
 report="reports/report_$(date -u +"%Y-%m-%d").json"
 cargo run -- -r "${rpcs[@]}" | jq > "$report"
 
+# Store as latest report
+cp "$report" reports/latest.json
+
 # Debugging
 echo "" && cat "$report"

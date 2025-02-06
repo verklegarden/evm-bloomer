@@ -11,62 +11,40 @@
     </style>
 </head>
 <body>
-    <h1>Latest Report</h1>
-    <pre id="report">
-{
-  "blooms": [
-    {
-      "bloom": "0xfff0fffc8000ffffffe0fffffffffffffffffffff8000000000000000000fc27",
-      "chain_id": 1,
-      "unknown_opcodes": [],
-      "version": "cancun"
-    },
-    {
-      "bloom": "0xfff0fffc8000ffffffe0fffffffffffffffffffff8000000000000000000fc27",
-      "chain_id": 10,
-      "unknown_opcodes": [],
-      "version": "cancun"
-    },
-    {
-      "bloom": "0x8000000000000000000000000000000000000000000000000000000000000002",
-      "chain_id": 324,
-      "unknown_opcodes": [],
-      "version": "unknown"
-    },
-    {
-      "bloom": "0xfff0fffc8000ffffff00fff1fffffffffffffffff8000000000000000000fc27",
-      "chain_id": 1101,
-      "unknown_opcodes": [
-        95
-      ],
-      "version": "berlin"
-    },
-    {
-      "bloom": "0xfff0fffc8000ffffffc0fffffffffffffffffffff8000000000000000000fc27",
-      "chain_id": 42161,
-      "unknown_opcodes": [
-        73,
-        92,
-        93,
-        94
-      ],
-      "version": "shanghai"
-    },
-    {
-      "bloom": "0xfff0fffc8000ffffffc0fffffffffffffffffffff8000000000000000000fc27",
-      "chain_id": 42170,
-      "unknown_opcodes": [
-        73,
-        92,
-        93,
-        94
-      ],
-      "version": "shanghai"
-    }
-  ]
-}
-</pre>
+    <h1>Latest JSON Report</h1>
+    <pre id="jsonOutput">Loading...</pre>
 
+    <script>
+        async function fetchLatestReport() {
+            try {
+                const response = await fetch('reports/latest.json');
+                const data = await response.json();
+
+                displayReport(data);
+            } catch (error) {
+                document.getElementById('jsonOutput').textContent = 'Failed to load report';
+            }
+        }
+
+        function displayReport(data) {
+            let html = '<table>';
+            html += '<tr><th>Chain ID</th><th>Version</th><th>Unknown Opcodes</th><th>Bloom</th></tr>';
+
+            data.blooms.forEach(bloom => {
+                html += `<tr>
+                            <td>${bloom.chain_id}</td>
+                            <td>${bloom.version}</td>
+                            <td>${bloom.unknown_opcodes.length > 0 ? bloom.unknown_opcodes.join(', ') : 'None'}</td>
+                            <td><code>${bloom.bloom}</code></td>
+                         </tr>`;
+            });
+
+            html += '</table>';
+            document.getElementById('jsonOutput').innerHTML = html;
+        }
+
+        fetchLatestReport();
+    </script>
 </body>
 </html>
 
