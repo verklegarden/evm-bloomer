@@ -13,12 +13,6 @@
       "version": "cancun"
     },
     {
-      "bloom": "0x8000000000000000000000000000000000000000000000000000000000000002",
-      "chain_id": 324,
-      "unknown_opcodes": [],
-      "version": "unknown"
-    },
-    {
       "bloom": "0xfff0fffc8000ffffff00fff1fffffffffffffffff8000000000000000000fc27",
       "chain_id": 1101,
       "unknown_opcodes": [

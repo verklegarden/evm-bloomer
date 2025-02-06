@@ -3,49 +3,134 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EVM Blooms</title>
+    <title>JSON Report Viewer</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
+        body { font-family: monospace; background: #fff; color: #000; margin: 20px; }
         h1 { text-align: center; }
-        pre { background: #f4f4f4; padding: 10px; border-radius: 5px; overflow-x: auto; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background: #f4f4f4; }
+        .bloom-grid { display: grid; grid-template-columns: repeat(64, 5px); gap: 1px; }
+        .bit { width: 5px; height: 5px; display: inline-block; }
+        .bit.on { background: black; }
+        .bit.off { background: white; border: 1px solid #ddd; }
+        .bloom-hex {
+            font-size: 10px; /* Adjust to your desired size */
+            word-wrap: break-word; /* Allows wrapping of the text if it’s too long */
+            white-space: pre-wrap; /* Keeps formatting of spaces and line breaks */
+            overflow-wrap: break-word; /* Ensures the text will break and not overflow */
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        hr {
+            width: 50%;    /* Set width to 50% of the page */
+            margin: 20px auto;  /* Center the line and add margin around it */
+        }
+
+        table {
+            width: 60%; /* Adjust width based on preference */
+            max-width: 80%; /* Sets a max-width as a percentage */
+            margin: 20px auto; /* Centers the table */
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); /* Optional aesthetic improvement */
+        }
+
+        footer,
+        .footer {
+            text-align: center;
+        }
     </style>
 </head>
 <body>
-    <h1>Latest JSON Report</h1>
-    <pre id="jsonOutput">Loading...</pre>
+    <div class="container">
+    <h1>The many Blooms of the EVM 🌼</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Chain ID</th>
+                <th>Version</th>
+                <th>Unknown Opcodes</th>
+                <th>Bloom</th>
+                <th>Bloom Visualization</th>
+            </tr>
+        </thead>
+        <tbody id="jsonTable"></tbody>
+    </table>
 
     <script>
+        // TODO: Why is this here?
+        const chains = {
+            1: "Ethereum Mainnet",
+            10: "OP Mainnet",
+            1101: "Polygon zkEVM",
+            42161: "Arbitrum One",
+            42170: "Arbitrum Nova"
+        };
+
         async function fetchLatestReport() {
             try {
                 const response = await fetch('reports/latest.json');
                 const data = await response.json();
-
                 displayReport(data);
             } catch (error) {
-                document.getElementById('jsonOutput').textContent = 'Failed to load report';
+                document.getElementById('jsonTable').innerHTML = '<tr><td colspan="4">Failed to load report</td></tr>';
             }
         }
 
-        function displayReport(data) {
-            let html = '<table>';
-            html += '<tr><th>Chain ID</th><th>Version</th><th>Unknown Opcodes</th><th>Bloom</th></tr>';
+        function hexToBinary(hex) {
+            return BigInt(hex).toString(2).padStart(512, '0');
+        }
 
+        function createBinaryGrid(binaryString) {
+            return binaryString.split('').map(bit => `<span class="bit ${bit === '1' ? 'on' : 'off'}"></span>`).join('');
+        }
+
+        function displayReport(data) {
+            let html = '';
             data.blooms.forEach(bloom => {
+                const binaryGrid = createBinaryGrid(hexToBinary(bloom.bloom));
+                const chainName = chains[bloom.chain_id] || "Unknown Chain";
+
                 html += `<tr>
-                            <td>${bloom.chain_id}</td>
-                            <td>${bloom.version}</td>
-                            <td>${bloom.unknown_opcodes.length > 0 ? bloom.unknown_opcodes.join(', ') : 'None'}</td>
-                            <td><code>${bloom.bloom}</code></td>
+                            <td>${chainName}</td>
+                            <td>${`<a href="https://chainid.network/chain/${bloom.chain_id}">${bloom.chain_id}</a>`}</td>
+                            <td>
+                              ${bloom.version !== "unknown"
+                                ? `<a href="https://www.evm.codes/?fork=${bloom.version}">${bloom.version}</a>`
+                                : 'unknown'}
+                            </td>
+                            <td>
+                              ${bloom.unknown_opcodes.length > 0
+                                ? bloom.unknown_opcodes.map(op => `0x${parseInt(op, 16).toString(16).toUpperCase()}`).join(', ')
+                                : ''}
+                            </td>
+                            <td><div class="bloom-hex">${bloom.bloom}</div></td>
+                            <td><div class="bloom-grid">${binaryGrid}</div></td>
                          </tr>`;
             });
-
-            html += '</table>';
-            document.getElementById('jsonOutput').innerHTML = html;
+            document.getElementById('jsonTable').innerHTML = html;
         }
 
         fetchLatestReport();
     </script>
+    </div>
+
+    <hr>
+
+    <div id="footer">
+        <p class="footer"><i>Report generated by
+                <a href="https://github.com/verklegarden/evm-bloomer">evm-bloomer</a>
+                at
+                <a id="today"></a>
+                    <script>
+                        const currentDate = new Date();
+                        const formattedDate = `${currentDate.getFullYear()}-${(currentDate.getMonth() + 1).toString().padStart(2, '0')}-${currentDate.getDate().toString().padStart(2, '0')}`;
+                        document.getElementById('today').textContent = formattedDate;
+                    </script>
+                <br />
+                Made with &#9829; by <a href="https://github.com/verklegarden">verklegarden</a>
+        <br />
 </body>
 </html>
-
-
