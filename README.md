@@ -4,7 +4,9 @@
 
 > An attempt to orchestrate the many blooms of the EVM
 
-The `evm-bloomer` is a tool to analyse chains' EVM versions.
+The `evm-bloomer` is a tool to analyse a chain's EVM support.
+
+See the latest report [here](https://verklegarden.github.io/evm-bloomer/).
 
 ## Usage
 
@@ -56,11 +58,11 @@ very hard to analyse it regarding unsupported opcodes.
 ## EVM Blooms
 
 The maximum number of opcodes the EVM can support (assuming no "opcode extension hacks")
-256 because an opcode is of type `uint8`.
+is 256 because an opcode is of type `uint8`.
 
 This means an EVM's opcode support can be encoded in a 256 bitmap or `bloom`.
 
-A similar project, [`OpcodesBitmap`](https://github.com/AmadiMichael/OpcodesBitmap/blob/main/src/OpcodesBitmap.sol) created by Michael Amadi, aimed at making an EVM's `bloom` available onchain.
+A similar project, [`OpcodesBitmap`](https://github.com/AmadiMichael/OpcodesBitmap/blob/main/src/OpcodesBitmap.sol) created by [Michael Amadi](https://amadimichael.github.io/), aimed at making an EVM's `bloom` available onchain.
 
 ## Bloom Creation
 
