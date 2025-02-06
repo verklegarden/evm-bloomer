@@ -6,11 +6,6 @@
 
 The `evm-bloomer` is a tool to analyse chains' EVM versions.
 
-> [!WARNING]
-> Does not work for many rpcs and may be unreliable.
->
-> Released to gather feedback. Not production ready!
-
 ## Usage
 
 ```sh
