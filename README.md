@@ -65,7 +65,7 @@ The maximum number of opcodes the EVM can support (assuming no "opcode extension
 
 This means an EVM's opcode support can be encoded in a 256 bitmap or `bloom`.
 
-A similar project, [`OpcodesBitmap`](https://github.com/AmadiMichael/OpcodesBitmap/blob/main/src/OpcodesBitmap.sol) created by Michal Amadi, aimed at making an EVM's `bloom` available onchain.
+A similar project, [`OpcodesBitmap`](https://github.com/AmadiMichael/OpcodesBitmap/blob/main/src/OpcodesBitmap.sol) created by Michael Amadi, aimed at making an EVM's `bloom` available onchain.
 
 ## Bloom Creation
 
