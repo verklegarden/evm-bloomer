@@ -1,0 +1,62 @@
+{
+  "blooms": [
+    {
+      "bloom": "0xfff0fffe8000ffffffe0ffffffffffff00000000f8000000000000000000fc27",
+      "chain_id": 1,
+      "unknown_opcodes": [],
+      "version": "unknown"
+    },
+    {
+      "bloom": "0xfff0fffc8000ffffffe0ffffffffffff00000000f8000000000000000000fc27",
+      "chain_id": 10,
+      "unknown_opcodes": [],
+      "version": "unknown"
+    },
+    {
+      "bloom": "0xfff0fffc8000ffffff80fffffffffffffffffffff8000000000000000000fc27",
+      "chain_id": 137,
+      "unknown_opcodes": [
+        92,
+        93,
+        94
+      ],
+      "version": "shanghai"
+    },
+    {
+      "bloom": "0xfff0fffc8000ffffffe0ffffffffffff00000000f8000000000000000000fc27",
+      "chain_id": 480,
+      "unknown_opcodes": [],
+      "version": "unknown"
+    },
+    {
+      "bloom": "0x8000000000000000000000000000000000000000000000000000000000000002",
+      "chain_id": 1101,
+      "unknown_opcodes": [],
+      "version": "unknown"
+    },
+    {
+      "bloom": "0xfff0fffe8000ffffffc0fffffffffffffffffffff8000000000000000000fc27",
+      "chain_id": 42161,
+      "unknown_opcodes": [
+        30,
+        73,
+        92,
+        93,
+        94
+      ],
+      "version": "shanghai"
+    },
+    {
+      "bloom": "0xfff0fffe8000ffffffc0fffffffffffffffffffff8000000000000000000fc27",
+      "chain_id": 42170,
+      "unknown_opcodes": [
+        30,
+        73,
+        92,
+        93,
+        94
+      ],
+      "version": "shanghai"
+    }
+  ]
+}
